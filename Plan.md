@@ -6,24 +6,24 @@
 We have to solve the equations:
 * hydrostatic equilibrium (as a function of density)
 
-![](hydrostatic.png)
+![](./PlanPictures/hydrostatic.png)
 
 * the transport equation
 
-![](transport.png)
+![](./PlanPictures/transport.png)
 
 
 * the definition of the enclosed mass
 
-![](mass.png)
+![](./PlanPictures/mass.png)
 
 * energy generation equation
 
-![](energy.png)
+![](./PlanPictures/energy.png)
 
 * optical depth (added so that we can define the photosphere)
 
-![](optical.png)
+![](./PlanPictures/optical.png)
 
 
 ###### Boundary Conditions of Equations
@@ -32,11 +32,11 @@ The center boundary conditions are M(0) = 0 and L(O) = 0.
 
 The radius boundary conditions are
 
-![](radiusboundary.png)
+![](./PlanPictures/radiusboundary.png)
 
 ###### Partials of Pressure
 
-![](partials.png)
+![](./PlanPictures/partials.png)
 
 We can use these to input into the hydrostatic equations! **(I am not super sure if this applies in all cases. I simply pulled it from the assignment.)**
 
