@@ -38,7 +38,7 @@ The radius boundary conditions are
 
 ![](partials.png)
 
-We can use these to input into the hydrostatic equations!
+We can use these to input into the hydrostatic equations! **(I am not super sure if this applies in all cases. I simply pulled it from the assignment.)**
 
 #### Part 2: Changing the Equations to Helium or Carbon Cores
 
