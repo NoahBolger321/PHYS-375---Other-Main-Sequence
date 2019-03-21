@@ -6,20 +6,39 @@
 We have to solve the equations:
 * hydrostatic equilibrium (as a function of density)
 
-$$\frac{dP}{dt}$$
+![](hydrostatic.png)
 
 * the transport equation
+
+![](transport.png)
 
 
 * the definition of the enclosed mass
 
+![](mass.png)
 
 * energy generation equation
+
+![](energy.png)
+
 * optical depth (added so that we can define the photosphere)
+
+![](optical.png)
 
 
 ###### Boundary Conditions of Equations
 
+The center boundary conditions are M(0) = 0 and L(O) = 0.
+
+The radius boundary conditions are
+
+![](radiusboundary.png)
+
+###### Partials of Pressure
+
+![](partials.png)
+
+We can use these to input into the hydrostatic equations!
 
 #### Part 2: Changing the Equations to Helium or Carbon Cores
 
