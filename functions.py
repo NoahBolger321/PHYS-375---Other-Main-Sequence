@@ -82,3 +82,32 @@ def dT_dR(kappa, rho, rad, T, lum, mass, press):
     first = 3*kappa*rho*lum / (16*math.pi*a*c*(T**3)*(rad**2))
     second = (1 - 1/gamma)*(T / press)*(G*mass*rho / rad**2)
     return np.min([first, second])
+
+
+# runge kutta coefficients 1st Order
+l0 = h*dT_dR(kappa, rho, rad, T, lum, mass, press)
+k0 = h*drho_dR(rho, rad, mass)
+m0 = h*dM_dR(rho)
+n0 = h*dL_dR(rho, rad, eps)
+p0 = h*dTau_dR(rho, kappa)
+
+# runge kutta coefficients 2nd Order
+l1 = h*dT_dR(kappa, rho+0.5*k0, rad+0.5*h, T+0.5*l0, lum+0.5*n0, mass+0.5*m0, press)
+k1 = h*drho_dR(rho+0.5*k0, rad+0.5*h, mass+0.5*m0)
+m1 = h*dM_dR(rho+0.5*k0)
+n1 = h*dL_dR(rho+0.5*k0, rad+0.5*h, esp)
+p1 = h*dTau_dr(rho+0.5*k0, kappa)
+
+# runge kutta coefficients 3rd Order
+l2 = h*dT_dR(kappa, rho+0.5*k1, rad+0.5*h, T+0.5*l1, lum+0.5*n1, mass+0.5*m1, press)
+k2 = h*drho_dR(rho+0.5*k1, rad+0.5*h, mass+0.5*m1)
+m2 = h*dM_dR(rho+0.5*k1)
+n2 = h*dL_dR(rho+0.5*k1, rad+0.5*h, esp)
+p2 = h*dTau_dr(rho+0.5*k1, kappa)
+
+# runge kutta coefficients 4th Order
+l3 = h*dT_dR(kappa, rho+0.5*k2, rad*h, T+0.5*l2, lum+0.5*n2, mass+0.5*m2, press)
+k3 = h*drho_dR(rho+0.5*k2, rad*h, mass+0.5*m2)
+m3 = h*dM_dR(rho+0.5*k2)
+n3 = h*dL_dR(rho+0.5*k2, rad*h, esp)
+p3 = h*dTau_dr(rho+0.5*k2, kappa)
