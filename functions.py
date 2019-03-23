@@ -86,14 +86,17 @@ def eps_cno(rho, T):
     return (8.24E-26) * (rho * 1E-5) * (X) * (0.03 * X) * ((T * 1E-6) ** 19.9)
 
 
+# starting temperature and density at "centre" values
 T = T_c
 rho = rho_c
 
+# intial values for radius, epsilon, mass and luminosity
 r_0 = 0.01
 eps_0 = eps_pp(rho_c, T_c) + eps_cno(rho_c, T_c)
 M = (4 * math.pi / 3.0) * (r_0 ** 3) * rho_c
 lum = (4 * math.pi / 3.0) * (r_0 ** 3) * rho_c * eps_0
 
+# empty storage arrays for plotting purposes
 M_vals = []
 rho_vals = []
 T_vals = []
@@ -108,12 +111,17 @@ def kappa_func(T):
     return 1 / (1 / kap_H + 1 / (np.max([kap_es, kap_ff])))
 
 
-# RK step size
+# RK step size, adn surface radius to be looped to
 h = 10000
 r_surf = 0.75 * r_sun
-counter = 0
 
 for rad in np.linspace(0.01, r_surf, 100000):
+    """This loops over a range of radius values ata  specified step size
+        - kappa, pressure and epsilon values will be updated after each iteration of the loop
+        - this loop implements fourth order Runge Kutta numerical integration for the 5 DEs that need to be solved
+        - the new values of temp, density, luminosity, mass and opacity are added to after each iteration as we are
+        integrating these values
+    """
 
     # kappa function
     kappa = kappa_func(T)
@@ -156,42 +164,53 @@ for rad in np.linspace(0.01, r_surf, 100000):
     # p3 = h * dTau_dR(rho + 0.5 * k2, kappa)
 
     # new temperature
-    T = T + (1 / 6.0) * (l0 + 2 * l1 + 2 * l2 + l3)
+    T += (1 / 6.0) * (l0 + 2 * l1 + 2 * l2 + l3)
     # new denisty
-    rho = rho + (1 / 6.0) * (k0 + 2 * k1 + 2 * k2 + k3)
+    rho += (1 / 6.0) * (k0 + 2 * k1 + 2 * k2 + k3)
     # new mass
-    M = M + (1 / 6.0) * (m0 + 2 * m1 + 2 * m2 + m3)
+    M += (1 / 6.0) * (m0 + 2 * m1 + 2 * m2 + m3)
     # new luminosity
-    lum = lum + (1 / 6.0) * (n0 + 2 * n1 + 2 * n2 + n3)
+    lum += (1 / 6.0) * (n0 + 2 * n1 + 2 * n2 + n3)
+    # new tau
+    # tau += (1/6.0)*(p0+2*p1+2*p2+p3)
 
     M_vals.append(M)
     rho_vals.append(rho)
     T_vals.append(T)
     L_vals.append(lum)
-    # new tau
-    # tau = tau + (1/6.0)*(p0+2*p1+2*p2+p3)
 
-    counter += 1
-    if counter < 10:
-        print(press)
+# print out final values fo each parameter for reference
 print("Temperature: {}".format(T))
 print("Density: {}".format(rho))
 print("Mass: {}".format(M))
 print("Luminosity: {}".format(lum))
 
+# plotting mass, density, temperature and luminosity as functions of r
 fig = plt.figure()
 plt.plot(np.linspace(0.01, r_surf, 100000), M_vals)
-fig.show()
+plt.title("Mass vs. Radius")
+plt.xlabel("Radius")
+plt.ylabel("Mass")
+# fig.show()
 
 fig2 = plt.figure()
 plt.plot(np.linspace(0.01, r_surf, 100000), rho_vals)
-fig2.show()
+plt.title("Density vs. Radius")
+plt.xlabel("Radius")
+plt.ylabel("Density")
+# fig2.show()
 
 fig3 = plt.figure()
 plt.plot(np.linspace(0.01, r_surf, 100000), T_vals)
-fig3.show()
+plt.title("Temperature vs. Radius")
+plt.xlabel("Radius")
+plt.ylabel("Temperature")
+# fig3.show()
 
 fig4 = plt.figure()
 plt.plot(np.linspace(0.01, r_surf, 100000), L_vals)
-fig4.show()
+plt.title("Luminosity vs. Radius")
+plt.xlabel("Radius")
+plt.ylabel("Luminosity")
+# fig4.show()
 plt.show()
