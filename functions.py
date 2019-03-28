@@ -2,8 +2,10 @@ import math
 import numpy as np
 from astropy import constants as ast_const
 import matplotlib
-matplotlib.use('TkAgg')
+matplotlib.use('TkAgg') # makes matplotlib work in virtualenv
 import matplotlib.pyplot as plt
+import seaborn as sns; sns.set()
+import seabornstyle # seaborn style file
 
 # defining constants
 h_bar = ast_const.hbar.value
@@ -187,13 +189,16 @@ print("Density: {}".format(rho))
 print("Mass: {}".format(M))
 print("Luminosity: {}".format(lum))
 
+#applies the plot style defined in seabornstyle
+seabornstyle.set_style()
+
 # plotting mass, density, temperature and luminosity as functions of r
 fig = plt.figure()
 plt.plot(np.linspace(0.01, r_surf, 100000), M_vals)
 plt.title("Mass vs. Radius")
 plt.xlabel("Radius")
 plt.ylabel("Mass")
-# fig.show()
+#fig.show()
 
 fig2 = plt.figure()
 plt.plot(np.linspace(0.01, r_surf, 100000), rho_vals)
