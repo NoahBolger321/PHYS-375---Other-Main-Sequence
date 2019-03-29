@@ -34,66 +34,72 @@ rho_c = 56.55 * 1000
 # units T_c: [K]
 T_c = 8.23E6
 
+# function returning Pressure
+def P(rho, T):
+    first_term = ((3 * math.pi ** 2) ** (2 / 3.0) / 5.0) * ((h_bar ** 2) / m_e) * (rho / m_p) ** (5 / 3.0)
+    second_term = rho * (k_b * T) / mew_mp
+    third_term = (1 / 3.0) * a * T ** 4
+    return first_term + second_term + third_term
+
+
+# DE for pressure in terms of rho
+def dP_drho(rho, T):
+    first = (((3 * math.pi ** 2) ** (2 / 3.0)) / 3.0) * ((h_bar ** 2) / (m_e * m_p)) * (rho / m_p) ** (2 / 3.0)
+    second = k_b * T / mew_mp
+    return first + second
+
+
+# DE for pressure in terms of temperature
+def dP_dT(rho, T):
+    return rho * k_b / (mew_mp) + (4 / 3.0) * a * (T ** 3)  # fixed - CM
+
+
+# DE for mass in terms of radius
+def dM_dR(rho, rad):
+    return (4 * math.pi * rad ** 2) * rho
+
+
+# DE for luminosity in terms of radius
+def dL_dR(rho, rad, eps):
+    return (4 * math.pi * rad ** 2) * rho * eps
+
+
+# DE for tau in terms of radius
+def dTau_dR(kappa, rho):
+    return kappa * rho
+
+
+# DE for density in terms of radius
+def drho_dR(rho, rad, mass, dPT, dTR, dPrho):
+    num = -((G * mass * rho / (rad ** 2)) + dPT * dTR)
+    denom = dPrho
+    return num / denom
+
+
+# DE for temperture in terms of radius
+def dT_dR(kappa, rho, rad, T, lum, mass, press):
+    first = 3 * kappa * rho * lum / (16 * math.pi * a * c * (T ** 3) * (rad ** 2))
+    second = (1 - 1 / gamma) * (T / press) * (G * mass * rho / rad ** 2)
+    return -1 * np.min([first, second])
+
+    
+# epsilon values (PP, CNO)
+def eps_pp(rho, T):
+    return (1.07E-7) * (rho * 1E-5) * (X ** 2) * ((T * 1E-6) ** 4)
+
+
+def eps_cno(rho, T):
+    return (8.24E-26) * (rho * 1E-5) * (X) * (0.03 * X) * ((T * 1E-6) ** 19.9)
+
+# kappa values
+def kappa_func(T, rho):
+    kap_es = (0.02 * (1 + X))
+    kap_ff = (1E24) * (Z + 0.0001) * ((rho * 1E-3) ** 0.7) * (T ** (-3.5))
+    kap_H = (2.5E-32) * (Z / 0.02) * ((rho * 1E-3) ** 0.5) * (T ** 9)
+    return 1 / (1 / kap_H + 1 / (np.max([kap_es, kap_ff])))
+
 # function which solves stellar equations for a main sequence star of radius r_surf
-def rksolver(r_surf):
-    
-    # function returning Pressure
-    def P(rho, T):
-        first_term = ((3 * math.pi ** 2) ** (2 / 3.0) / 5.0) * ((h_bar ** 2) / m_e) * (rho / m_p) ** (5 / 3.0)
-        second_term = rho * (k_b * T) / mew_mp
-        third_term = (1 / 3.0) * a * T ** 4
-        return first_term + second_term + third_term
-    
-    
-    # DE for pressure in terms of rho
-    def dP_drho(rho, T):
-        first = (((3 * math.pi ** 2) ** (2 / 3.0)) / 3.0) * ((h_bar ** 2) / (m_e * m_p)) * (rho / m_p) ** (2 / 3.0)
-        second = k_b * T / mew_mp
-        return first + second
-    
-    
-    # DE for pressure in terms of temperature
-    def dP_dT(rho, T):
-        return rho * k_b / (mew_mp) + (4 / 3.0) * a * (T ** 3)  # fixed - CM
-    
-    
-    # DE for mass in terms of radius
-    def dM_dR(rho, rad):
-        return (4 * math.pi * rad ** 2) * rho
-    
-    
-    # DE for luminosity in terms of radius
-    def dL_dR(rho, rad, eps):
-        return (4 * math.pi * rad ** 2) * rho * eps
-    
-    
-    # DE for tau in terms of radius
-    def dTau_dR(kappa, rho):
-        return kappa * rho
-    
-    
-    # DE for density in terms of radius
-    def drho_dR(rho, rad, mass):
-        num = -((G * mass * rho / (rad ** 2)) + dPT * dTR)
-        denom = dPrho
-        return num / denom
-    
-    
-    # DE for temperture in terms of radius
-    def dT_dR(kappa, rho, rad, T, lum, mass, press):
-        first = 3 * kappa * rho * lum / (16 * math.pi * a * c * (T ** 3) * (rad ** 2))
-        second = (1 - 1 / gamma) * (T / press) * (G * mass * rho / rad ** 2)
-        return -1 * np.min([first, second])
-    
-        
-    # epsilon values (PP, CNO)
-    def eps_pp(rho, T):
-        return (1.07E-7) * (rho * 1E-5) * (X ** 2) * ((T * 1E-6) ** 4)
-    
-    
-    def eps_cno(rho, T):
-        return (8.24E-26) * (rho * 1E-5) * (X) * (0.03 * X) * ((T * 1E-6) ** 19.9)
-    
+def rksolver(r_surf):    
     
     # starting temperature and density at "centre" values
     T = T_c
@@ -109,21 +115,10 @@ def rksolver(r_surf):
     M_vals = []
     rho_vals = []
     T_vals = []
-    L_vals = []
-    
-    
-    # kappa values
-    def kappa_func(T):
-        kap_es = (0.02 * (1 + X))
-        kap_ff = (1E24) * (Z + 0.0001) * ((rho * 1E-3) ** 0.7) * (T ** (-3.5))
-        kap_H = (2.5E-32) * (Z / 0.02) * ((rho * 1E-3) ** 0.5) * (T ** 9)
-        return 1 / (1 / kap_H + 1 / (np.max([kap_es, kap_ff])))
-    
+    L_vals = []    
     
     # RK step size, and surface radius to be looped to
     h = 10000
-    
-    
     
     for rad in np.linspace(0.01, r_surf, 100000):
         """This loops over a range of radius values ata  specified step size
@@ -134,7 +129,7 @@ def rksolver(r_surf):
         """
     
         # kappa function
-        kappa = kappa_func(T)
+        kappa = kappa_func(T, rho)
         # pressure calculation
         press = P(rho, T)
         # espilon calculation
@@ -147,28 +142,28 @@ def rksolver(r_surf):
     
         # runge kutta coefficients 1st Order
         l0 = h * dT_dR(kappa, rho, rad, T, lum, M, press)
-        k0 = h * drho_dR(rho, rad, M)
+        k0 = h * drho_dR(rho, rad, M, dPT, dTR, dPrho)
         m0 = h * dM_dR(rho, rad)
         n0 = h * dL_dR(rho, rad, eps)
         # p0 = h * dTau_dR(rho, kappa)
     
         # runge kutta coefficients 2nd Order
         l1 = h * dT_dR(kappa, rho + 0.5 * k0, rad + 0.5 * h, T + 0.5 * l0, lum + 0.5 * n0, M + 0.5 * m0, press)
-        k1 = h * drho_dR(rho + 0.5 * k0, rad + 0.5 * h, M + 0.5 * m0)
+        k1 = h * drho_dR(rho + 0.5 * k0, rad + 0.5 * h, M + 0.5 * m0, dPT, dTR, dPrho)
         m1 = h * dM_dR(rho + 0.5 * k0, rad + 0.5 * h)
         n1 = h * dL_dR(rho + 0.5 * k0, rad + 0.5 * h, eps)
         # p1 = h * dTau_dR(rho + 0.5 * k0, kappa)
     
         # runge kutta coefficients 3rd Order
         l2 = h * dT_dR(kappa, rho + 0.5 * k1, rad + 0.5 * h, T + 0.5 * l1, lum + 0.5 * n1, M + 0.5 * m1, press)
-        k2 = h * drho_dR(rho + 0.5 * k1, rad + 0.5 * h, M + 0.5 * m1)
+        k2 = h * drho_dR(rho + 0.5 * k1, rad + 0.5 * h, M + 0.5 * m1, dPT, dTR, dPrho)
         m2 = h * dM_dR(rho + 0.5 * k1, rad + 0.5 * h)
         n2 = h * dL_dR(rho + 0.5 * k1, rad + 0.5 * h, eps)
         # p2 = h * dTau_dR(rho + 0.5 * k1, kappa)
     
         # runge kutta coefficients 4th Order
         l3 = h * dT_dR(kappa, rho + k2, rad + h, T + l2, lum + n2, M + m2, press)
-        k3 = h * drho_dR(rho + k2, rad + h, M + m2)
+        k3 = h * drho_dR(rho + k2, rad + h, M + m2, dPT, dTR, dPrho)
         m3 = h * dM_dR(rho + k2, rad + h)
         n3 = h * dL_dR(rho + k2, rad + h, eps)
         # p3 = h * dTau_dR(rho + 0.5 * k2, kappa)
@@ -213,19 +208,19 @@ def scaleplots(M_vals, rho_vals, T_vals, L_vals):
    Uncomment to get individual star plots
 """
 
-#(r_surf, M_vals, rho_vals, T_vals, L_vals) = rksolver(0.75*r_sun);
-#(norm_M, norm_rho, norm_L, norm_T) = scaleplots(M_vals, rho_vals, T_vals, L_vals);
+(r_surf, M_vals, rho_vals, T_vals, L_vals) = rksolver(0.75*r_sun);
+(norm_M, norm_rho, norm_L, norm_T) = scaleplots(M_vals, rho_vals, T_vals, L_vals);
 
 ##applies the plot style defined in seabornstyle
 #seabornstyle.set_style()
 
 #plotting mass, density, temperature and luminosity as functions of r
-#fig = plt.figure()
-#plt.plot(np.linspace(0.01, r_surf, 100000), norm_M)
-#plt.title("Mass vs. Radius")
-#plt.xlabel("Radius")
-#plt.ylabel("Mass")
-#fig.show()
+fig = plt.figure()
+plt.plot(np.linspace(0.01, r_surf, 100000), norm_M)
+plt.title("Mass vs. Radius")
+plt.xlabel("Radius")
+plt.ylabel("Mass")
+fig.show()
 
 #fig2 = plt.figure()
 #plt.plot(np.linspace(0.01, r_surf, 100000), norm_rho)
@@ -247,4 +242,4 @@ def scaleplots(M_vals, rho_vals, T_vals, L_vals):
 #plt.xlabel("Radius")
 #plt.ylabel("Luminosity")
 ## fig4.show()
-#plt.show()
+plt.show()
