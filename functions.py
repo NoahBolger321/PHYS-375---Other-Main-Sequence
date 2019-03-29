@@ -2,7 +2,7 @@ import math
 import numpy as np
 from astropy import constants as ast_const
 import matplotlib
-matplotlib.use('TkAgg') # needed for Yilda to make matplotlib work in virtualenv
+#matplotlib.use('TkAgg') # needed for Yilda to make matplotlib work in virtualenv
 import matplotlib.pyplot as plt
 
 # seaborn style file
