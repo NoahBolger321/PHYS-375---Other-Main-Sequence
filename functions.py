@@ -2,7 +2,7 @@ import math
 import numpy as np
 from astropy import constants as ast_const
 import matplotlib
-#matplotlib.use('TkAgg') # needed for Yilda to make matplotlib work in virtualenv
+matplotlib.use('TkAgg') # needed for Yilda to make matplotlib work in virtualenv
 import matplotlib.pyplot as plt
 
 # seaborn style file
@@ -205,15 +205,7 @@ def scaleplots(M_vals, rho_vals, T_vals, L_vals):
         norm_rho.append(rho/rho_c)
         norm_T.append(T/T_c)
         norm_L.append(L/l_sun)
-    print(L_vals[-1])
-    print(l_sun)
-    print(norm_L[-1])
     return (norm_M, norm_rho, norm_L, norm_T)
-
-rksolver(487*r_sun)
-rksolver(r_sun)
-rksolver(0.5*r_sun)
-
 
 """example: for sun-like star
    I have commented out all this so that it does not plot all the graphs for

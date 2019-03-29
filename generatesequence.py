@@ -2,7 +2,7 @@ import math
 import numpy as np
 from astropy import constants as ast_const
 import matplotlib
-#matplotlib.use('TkAgg') # needed for Yilda to make matplotlib work in virtualenv
+matplotlib.use('TkAgg') # needed for Yilda to make matplotlib work in virtualenv
 import matplotlib.pyplot as plt
 
 # seaborn style file
@@ -36,13 +36,10 @@ def mainsequence(n):
         L.append(norm_L[-1])
         M.append(norm_M[-1])
         R.append(rad)
-        print(R)
-        print(T)
-        print(L)
     return (R, T, L, M)
 
 #example: create main sequence of 20 stars and plot HR diagram            
-(rad, temp, lum, mass) = mainsequence(20)
+(rad, temp, lum, mass) = mainsequence(3)
 
 plt.scatter(temp, lum);
 plt.gca().invert_xaxis()
