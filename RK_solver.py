@@ -3,6 +3,7 @@ import numpy as np
 from astropy import constants as ast_const
 import matplotlib.pyplot as plt
 import time
+import multiprocessing
 import csv
 import os
 
@@ -370,7 +371,19 @@ def star_gen(T):
 
 
 # TODO: this is the interim generation function, it takes a Tc value and prints/plots results
-temps = [12.5E6]
-for temp in temps:
-    star_gen(temp)
-    print("WROTE: {}".format(temp))
+temps = [2.1E6, 2.2E6]
+# start = time.time()
+# for temp in temps:
+#     star_gen(temp)
+#     print("WROTE: {}".format(temp))
+# end = time.time()
+# print("Runtime:", end-start)
+
+# multiprocessing: allows two stars to be run simultaneously
+if __name__ == '__main__':
+    jobs = []
+    for temp in temps:
+        p = multiprocessing.Process(target=star_gen, args=(temp,))
+        jobs.append(p)
+        p.start()
+
