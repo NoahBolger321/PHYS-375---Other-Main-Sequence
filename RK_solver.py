@@ -1,13 +1,6 @@
 import math
 import numpy as np
 from astropy import constants as ast_const
-import matplotlib.pyplot as plt
-import time
-import csv
-import os
-
-
-root = os.path.dirname(os.path.abspath(__file__))
 
 
 def star_gen(T):
@@ -329,48 +322,10 @@ def star_gen(T):
     norm_rho = [p / rho_vals[0] for p in rho_vals]
     norm_T = [t / T_c for t in T_vals]
 
-    # printing the final values after rho_c is found
-    print('FINAL VALUES')
-    print("=============================")
-    print("Radius: {}".format(str(radii[-1])))
-    print("Mass: {}".format(str(M_vals[-1])))
-    print("Temperature: {}".format(str(T_vals[-1])))
-    print("Density: {}".format(str(rho_vals[-1])))
-    print("Luminosity: {}".format(str(L_vals[-1])))
-
     # applies the plot style defined in seabornstyle
     # seabornstyle.set_style()
 
-    """example: for sun-like star
-       I have commented out all this so that it does not plot the graph for
-       every single generated star in generatesequence.py
-       Uncomment to get plot for each star
-    """
     # plotting all curves on the same graph
-    plt.figure()
-    plt.plot(norm_R, norm_M, label=("Mass" + str(M_vals[-1])))
-    plt.plot(norm_R, norm_rho, label="Density")
-    plt.plot(norm_R, norm_T, label="Temperature")
-    plt.plot(norm_R, norm_L, label="Luminosity")
-    # plt.plot(norm_R, depths)
-    plt.legend(loc="best")
-    plt.xlabel("Radius {}".format(str(radii[-1])))
-    plt.ylabel('M/M* Rho/Rho* T/Tc L/L*')
-    plt.savefig("{}/figures_init/test_star_{}.png".format(root, T_c))
-    # plt.show()
 
-    # csv file for writing star data
-    data_file = "{}/star_data.csv".format(root)
-    with open(data_file, 'a') as write_f:
-        writer = csv.writer(write_f, delimiter=',')
-        values_all = [T_c, rho_vals[0], radii[-1], M_vals[-1], T_vals[-1], rho_vals[-1], L_vals[-1]]
-        writer.writerow(values_all)
-        # writer.writerow('\n')
-    write_f.close()
-
-
-# TODO: this is the interim generation function, it takes a Tc value and prints/plots results
-temps = [12.5E6]
-for temp in temps:
-    star_gen(temp)
-    print("WROTE: {}".format(temp))
+    return {"radii": radii, "M_vals": M_vals, "T_vals": T_vals, "rho_vals": rho_vals, "L_vals": L_vals,
+            "norm_R": norm_R, "norm_M": norm_M, "norm_rho": norm_rho, "norm_T": norm_T, "norm_L": norm_L}
