@@ -2,9 +2,13 @@ import math
 import numpy as np
 from astropy import constants as ast_const
 import matplotlib.pyplot as plt
+import time
+import csv
 import os
 
+
 root = os.path.dirname(os.path.abspath(__file__))
+
 
 def star_gen(T):
     # defining constants
@@ -96,6 +100,7 @@ def star_gen(T):
         num = lum - 4 * math.pi * sigma_SB * (rad ** 2) * (temp ** 4)
         denom = math.sqrt(4 * math.pi * sigma_SB * (rad ** 2) * (temp ** 4) * lum)
         return num / denom
+
 
     # function which solves stellar equations for a main sequence star of radius r_surf
     def rksolver(rho_c):
@@ -225,15 +230,15 @@ def star_gen(T):
             new_dRho_r = dRho_0 / h
             del_tau = (kappa * rho ** 2) / abs(new_dRho_r)
 
-            if count % 10000 == 0:
-                print('\n')
-                print("R/Rsun:", rad / r_sun, "dTau:", del_tau, "Mass:", M)
+            # if count % 10000 == 0:
+            #     print('\n')
+            #     print("R/Rsun:", rad / r_sun, "dTau:", del_tau, "Mass:", M)
 
             # check delta tau surface condition, mass condition and iteration condition
             # TODO: implement this in function or as part of loop
-            if (del_tau < (2 / 3)) or (M > 2e31) or (count > 250000):
-                print("Mass: {}, Luminosity: {}, Radius: {}, Density: {}, dTau: {}"
-                      .format(str(M), str(lum), str(rad), str(rho), str(del_tau)))
+            if (del_tau < (2 / 3)) or (M > 1e32) or rad > 20*r_sun:
+                # print("Mass: {}, Luminosity: {}, Radius: {}, Density: {}, dTau: {}"
+                #       .format(str(M), str(lum), str(rad), str(rho), str(del_tau)))
 
                 # evaluating the f function as surface condition reached, part of bisection
                 f = trial(lum, rad, T)
@@ -253,77 +258,67 @@ def star_gen(T):
         return {"radii": radii, "M_vals": M_vals, "rho_vals": rho_vals, "T_vals": T_vals, "L_vals": L_vals,
                 "depths": depths, "trial_f": f}
 
-    def bisection(a, b):
-        a = b
-        counter = 0
-        # loop while f values is still positive, decreasing the upper rho_c
-        while rksolver(a)["trial_f"] > -0.001:
-            counter += 1
-            a = a - 0.01 * a
-            print('stepping down to a root....', a, rksolver(a)["trial_f"], )
-        # use same number of steps as before to count down teh b value
-        for i in range(counter - 1):
-            b = b - 0.01 * b
-        a = a
-        # TODO: check for more efficient way to do this
-        if 1.005 * a < 0:
-            a = 1.005 * a
-        else:
-            a = a
-        if 1.005 * a < 0:
-            a = 1.005 * a
-        else:
-            a = a
-        if 1.005 * a < 0:
-            a = 1.005 * a
-        else:
-            a = a
+    def bisection(a):
+        values = []
+        # print("F1:", rksolver(a)["trial_f"])
+        while rksolver(a)["trial_f"] > 0:
+            values.append(a)
+            a = a - 0.02 * a
+        #     print('\n')
+        #     print("Stepping down to a root, rho_c, F1:", a, rksolver(a)["trial_f"])
+        # print(values)
+        b = values[-1]
 
-        # begin the bisection with "stepped down" values
-        print("starting bisection with", a, b)
+        # print('starting bisection with lower, upper', a, b)
+        # print('starting F1', a)
         f1 = rksolver(a)["trial_f"]
+        # print('starting F2', b)
         f2 = rksolver(b)["trial_f"]
+
         m = (a + b) / 2.0
-
-        # calculate an fnew value with the bisected rho_c, print for sanity checks
-        print("Calculating fnew with rho_c = ", m)
+        # print('Starting Fnew', m)
         f_new = rksolver(m)["trial_f"]
-        print('\n')
-        print("F1, F2, Fnew: ",f1, f2, f_new)
-        print('\n')
+        # print('\n')
+        # print('F1, F2, Fnew', f1, f2, f_new)
+        # print('\n')
 
-        # loop until f_new falls below 0.7
-        while not abs(f_new) < 0.7:
-            """
-                np.sign returns +-1 depending on sign of value, reset new rho_c and calculate new f values
-                NOTE: this is where bisection actually happens
-            """
+        while not abs(f_new) < 0.5:
             if np.sign(f_new) + np.sign(f1) == 0:
+
                 a = a
                 f1 = f1
                 b = m
                 f2 = f_new
+                # print('\n')
+                # print('F1, F2, Fnew', f1, f2, f_new)
+                # print('\n')
             elif np.sign(f_new) + np.sign(f2) == 0:
                 a = m
                 f1 = f_new
                 b = b
                 f2 = f2
-
-           # calculate new rho_c from the newly generated upper/lower bounds
+                # print('\n')
+                # print('F1, F2, Fnew', f1, f2, f_new)
+                # print('\n')
             m = (a + b) / 2.0
-            print("Re-calculating fnew with rho_c = ", m)
+            # this condition ensure we can converge
+            if abs(a - b) < 0.000000001:
+                m = b
+                return (rksolver(b))
+            # print('\n')
+            # print("Starting Fnew, low, mid, upper", a, m, b)
             f_new = rksolver(m)["trial_f"]
-            print('\n')
-            print("Newly generated F1, F2, Fnew: ", f1, f2, f_new,)
-            print('\n')
+            # print('\n')
+            # print('F1, F2, Fnew', f1, f2, f_new)
+            # print('\n')
         return rksolver(m)
 
     # testing rho_c with lower limit and upper limit for bisection
-    low_rho_c = 300
+    # low_rho_c = 300
     high_rho_c = 500000
 
     # running the  bisection function over the runge kutta solver
-    solved = bisection(low_rho_c, high_rho_c)
+    solved = bisection(high_rho_c)
     radii = solved["radii"]
     M_vals = solved["M_vals"]
     rho_vals = solved["rho_vals"]
@@ -366,7 +361,20 @@ def star_gen(T):
     plt.xlabel("Radius {}".format(str(radii[-1])))
     plt.ylabel('M/M* Rho/Rho* T/Tc L/L*')
     plt.savefig("{}/figures_init/test_star_{}.png".format(root, T_c))
-    plt.show()
+    # plt.show()
+
+    # csv file for writing star data
+    data_file = "{}/star_data.csv".format(root)
+    with open(data_file, 'a') as write_f:
+        writer = csv.writer(write_f, delimiter=',')
+        values_all = [T_c, rho_vals[0], radii[-1], M_vals[-1], T_vals[-1], rho_vals[-1], L_vals[-1]]
+        writer.writerow(values_all)
+        # writer.writerow('\n')
+    write_f.close()
+
 
 # TODO: this is the interim generation function, it takes a Tc value and prints/plots results
-star_gen(2e6)
+temps = [12.5E6]
+for temp in temps:
+    star_gen(temp)
+    print("WROTE: {}".format(temp))
