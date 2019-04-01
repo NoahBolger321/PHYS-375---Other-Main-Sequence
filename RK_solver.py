@@ -230,11 +230,7 @@ def star_gen(T):
             new_dRho_r = dRho_0 / h
             del_tau = (kappa * rho ** 2) / abs(new_dRho_r)
 
-            # if count % 10000 == 0:
-            #     print('\n')
-            #     print("R/Rsun:", rad / r_sun, "dTau:", del_tau, "Mass:", M)
-
-            # check delta tau surface condition, mass condition and iteration condition
+            # check delta tau surface condition, mass condition and radius condition
             # TODO: implement this in function or as part of loop
             if (del_tau < (2 / 3)) or (M > 1e32) or rad > 20*r_sun:
                 # print("Mass: {}, Luminosity: {}, Radius: {}, Density: {}, dTau: {}"
