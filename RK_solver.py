@@ -107,7 +107,7 @@ def star_gen(T):
         T = T_c
         rho = rho_c
 
-        r_0 = 0.001
+        r_0 = 0.01
         eps_0 = eps_pp(rho, T) + eps_cno(rho, T)
         M_0 = (4 * math.pi / 3.0) * (r_0 ** 3) * rho
         lum_0 = (4 * math.pi / 3.0) * (r_0 ** 3) * rho * eps_0
@@ -224,15 +224,32 @@ def star_gen(T):
             del_tau = (kappa * rho ** 2) / abs(new_dRho_r)
 
             # check delta tau surface condition, mass condition and radius condition
-            # TODO: implement this in function or as part of loop
-            if (del_tau < (2 / 3)) or (M > 1e32) or rad > 20*r_sun:
-                # print("Mass: {}, Luminosity: {}, Radius: {}, Density: {}, dTau: {}"
-                #       .format(str(M), str(lum), str(rad), str(rho), str(del_tau)))
+            if (del_tau < (0.001)) or (M > 1e32) or (rad > 20 * r_sun):  ## set M > 1e32, change to radius limit
+                # print('new run')
+                # print(M, 'mass', lum, 'lum', rad, 'rad', rho, 'rho', del_tau, 'dtau')
+                for tau23 in depths[::-1]:
+                    if (tau - tau23 > 2 / 3) and (tau - tau23 < 1.2):
+                        index = depths.index(tau23)
+                        # print('new run2')
+                        # print(M, 'mass', lum, 'lum', rad, 'rad', rho, 'rho', del_tau, 'dtau', T, 'temp_s')
+                        # print(index)
+                        # print(tau - tau23)
 
-                # evaluating the f function as surface condition reached, part of bisection
+                        M_vals = M_vals[0:index]
+                        rho_vals = rho_vals[0:index]
+                        T_vals = T_vals[0:index]
+                        L_vals = L_vals[0:index]
+                        depths = depths[0:index]
+                        radii = radii[0:index]
+                        break
+                    else:
+                        continue
+                lum = L_vals[-1]
+                rad = radii[-1]
+                T = T_vals[-1]
                 f = trial(lum, rad, T)
+                # print (rad/r_sun, del_tau, M)
                 break
-
             # adding step size to radius
             rad = rad + h
 
@@ -295,7 +312,7 @@ def star_gen(T):
                 m = b
                 return (rksolver(b))
             # print('\n')
-            # print("Starting Fnew, low, mid, upper", a, m, b)
+            print("Starting Fnew, low, mid, upper", a, m, b)
             f_new = rksolver(m)["trial_f"]
             # print('\n')
             # print('F1, F2, Fnew', f1, f2, f_new)
