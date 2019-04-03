@@ -202,14 +202,14 @@ def star_gen(T):
             p3 = h * dTau_dR(rho + k2, kappa)
 
             # kappa, pressure and epsilon calculations (4th order)
-            kappa = kappa_func(rho + 0.5*k1, T + 0.5*l1)
-            press = P(rho + 0.5 * k1, T + 0.5 * l1)
-            eps = eps_pp(rho + 0.5 * k1, T + 0.5 * l1) + eps_cno(rho + 0.5 * k1, T + 0.5 * l1)
+            kappa = kappa_func(rho + 0.5*k3, T + 0.5*l3)
+            press = P(rho + 0.5 * k3, T + 0.5 * l3)
+            eps = eps_pp(rho + 0.5 * k3, T + 0.5 * l3) + eps_cno(rho + 0.5 * k3, T + 0.5 * l3)
 
             # single differentials (4th order)
-            dTR = dT_dR(kappa, rho + 0.5 * k1, rad + 0.5 * h, T + 0.5 * l1, lum + 0.5 * n1, M + 0.5 * m1, press)
-            dPT = dP_dT(rho + 0.5 * k1, T + 0.5 * l1)
-            dPrho = dP_drho(rho + 0.5 * k1, T + 0.5 * l1)
+            dTR = dT_dR(kappa, rho + 0.5 * k3, rad + 0.5 * h, T + 0.5 * l3, lum + 0.5 * n3, M + 0.5 * m3, press)
+            dPT = dP_dT(rho + 0.5 * k3, T + 0.5 * l3)
+            dPrho = dP_drho(rho + 0.5 * k3, T + 0.5 * l3)
 
             # updated temp, density, mass, luminosity and optical depth
             T = T + (1 / 6.0) * (l0 + 2 * l1 + 2 * l2 + l3)
